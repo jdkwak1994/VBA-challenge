@@ -1,0 +1,108 @@
+Attribute VB_Name = "Module1"
+Sub stock_analysis()
+    
+    For Each ws In Worksheets
+    
+        Dim ticker As String
+        Dim totalvolume As Double
+        Dim openprice As Double
+        Dim opentrack As Long
+        Dim closeprice As Double
+        Dim yearchange As Double
+        Dim pchange As Double
+        Dim row As Integer
+        Dim lastrow As Long
+    
+        totalvolume = 0
+        opentrack = 2
+        row = 2
+        lastrow = ws.Cells(1, 1).End(xlDown).row
+    
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        ws.Columns("K").NumberFormat = "0.00%"
+    
+        Dim i As Long
+        For i = 2 To lastrow
+            ticker = ws.Cells(i, 1).Value
+            totalvolume = totalvolume + ws.Cells(i, 7).Value
+        
+            If ticker <> ws.Cells(i + 1, 1).Value Then
+                openprice = ws.Cells(opentrack, 3).Value
+                closeprice = ws.Cells(i, 6).Value
+                yearchange = closeprice - openprice
+                If openprice <> 0 Then
+                    pchange = yearchange / openprice
+                    pchange = Round(pchange, 4)
+                Else
+                    pchange = 0
+                End If
+                
+                ws.Cells(row, 9).Value = ticker
+                ws.Cells(row, 10).Value = yearchange
+                ws.Cells(row, 11).Value = pchange
+                ws.Cells(row, 12).Value = totalvolume
+            
+                If yearchange > 0 Then
+                    ws.Cells(row, 10).Interior.ColorIndex = 4
+                ElseIf yearchange < 0 Then
+                    ws.Cells(row, 10).Interior.ColorIndex = 3
+                Else
+                    ws.Cells(row, 10).Interior.ColorIndex = 2
+                End If
+            
+                row = row + 1
+                opentrack = i + 1
+                totalvolume = 0
+            
+            End If
+        Next i
+    
+        Dim incticker As String
+        Dim decticker As String
+        Dim tvticker As String
+        Dim incpercent As Double
+        Dim decpercent As Double
+        Dim gtvolume As Double
+    
+        incpercent = 0
+        decpercent = 0
+        gtvolume = 0
+        row = 2
+        lastrow = Cells(1, 9).End(xlDown).row
+    
+        ws.Cells(2, 14).Value = "Greatest % Increase"
+        ws.Cells(3, 14).Value = "Greatest % Decrease"
+        ws.Cells(4, 14).Value = "Greatest Total Volume"
+        ws.Cells(1, 15).Value = "Ticker"
+        ws.Cells(1, 16).Value = "Value"
+        ws.Range("P2:P3").NumberFormat = "0.00%"
+    
+        Dim j As Long
+        For j = 2 To lastrow
+            If incpercent < ws.Cells(j, 11).Value Then
+                incpercent = ws.Cells(j, 11).Value
+                incticker = ws.Cells(j, 9).Value
+            End If
+        
+            If decpercent > ws.Cells(j, 11).Value Then
+                decpercent = ws.Cells(j, 11).Value
+                decticker = ws.Cells(j, 9).Value
+            End If
+        
+            If gtvolume < ws.Cells(j, 12).Value Then
+                gtvolume = ws.Cells(j, 12).Value
+                tvticker = ws.Cells(j, 9).Value
+            End If
+        Next j
+    
+        ws.Cells(2, 15).Value = incticker
+        ws.Cells(2, 16).Value = incpercent
+        ws.Cells(3, 15).Value = decticker
+        ws.Cells(3, 16).Value = decpercent
+        ws.Cells(4, 15).Value = tvticker
+        ws.Cells(4, 16).Value = gtvolume
+    Next ws
+End Sub
